@@ -25,10 +25,16 @@ func usersHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func getUserInfoHandler(w http.ResponseWriter, r *http.Request){
-	fmt.Printf("path : %s\n",r.URL.Path)
-	//slice := strings.Split(r.URL.Path,"/")
-	vars := mux.Vars(r)
-	fmt.Fprint(w,"User Id:"+vars["id"])
+	user := new(User)
+	user.ID = 2
+	user.FirstName = "Han"
+	user.LastName = "Dong"
+	user.Email = "gamedokdok@naver.com"
+		
+	w.Header().Add("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
+	data, _ := json.Marshal(user)
+	fmt.Fprint(w,string(data))
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request){
