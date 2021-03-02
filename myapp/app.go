@@ -69,7 +69,25 @@ func createUserHandler(w http.ResponseWriter, r *http.Request){
 	data, _ := json.Marshal(user)
 	fmt.Fprint(w,string(data))
 }
+func deleteUserHandler(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err)
+		return
+	}
+	_ , ok := userMap[id]
+	if !ok {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,"No Delete User ID:",id)
+		return
+	}
+	delete(userMap,id)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w,"Deleted User ID : ",id)
 
+}
 
 func NewHandler() http.Handler{
 	userMap = make(map[int]*User)
@@ -81,6 +99,8 @@ func NewHandler() http.Handler{
 	//메소드에따라서 구분지어줄 수 있다.
 	mux.HandleFunc("/users",usersHandler).Methods("GET")
 	mux.HandleFunc("/users",createUserHandler).Methods("POST")	
-	mux.HandleFunc("/users/{id:[0-9]+}",getUserInfoHandler)
+	mux.HandleFunc("/users/{id:[0-9]+}",getUserInfoHandler).Methods("GET")
+	mux.HandleFunc("/users/{id:[0-9]+}",deleteUserHandler).Methods("DELETE")
+
 	return mux
 }
