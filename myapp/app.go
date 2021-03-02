@@ -4,6 +4,7 @@ import(
 	"net/http"
 	"fmt"
 	"time"
+	"strconv"
 	"encoding/json"
 	"github.com/gorilla/mux"
 )
@@ -16,6 +17,9 @@ type User struct{
 	CreatedAt time.Time `json:"created_at"`
 }
 
+var userMap map[int]*User
+var lastID int
+
 func indexHandler(w http.ResponseWriter, r *http.Request){
 	fmt.Fprint(w,"Hello World")
 }
@@ -25,11 +29,20 @@ func usersHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func getUserInfoHandler(w http.ResponseWriter, r *http.Request){
-	user := new(User)
-	user.ID = 2
-	user.FirstName = "Han"
-	user.LastName = "Dong"
-	user.Email = "gamedokdok@naver.com"
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w,err)
+		return
+	}
+	user, ok := userMap[id]
+	if !ok{
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,"No User Id:",id)
+		return
+	}
+
 		
 	w.Header().Add("Content-Type","application/json")
 	w.WriteHeader(http.StatusOK)
@@ -46,8 +59,12 @@ func createUserHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	//Created User
-	user.ID = 2
+	lastID++
+	user.ID = lastID
 	user.CreatedAt = time.Now()
+	userMap[user.ID] = user
+
+	w.Header().Add("Content-Type","application/json")
 	w.WriteHeader(http.StatusCreated)
 	data, _ := json.Marshal(user)
 	fmt.Fprint(w,string(data))
@@ -55,10 +72,13 @@ func createUserHandler(w http.ResponseWriter, r *http.Request){
 
 
 func NewHandler() http.Handler{
+	userMap = make(map[int]*User)
+	lastID = 0
 	mux := mux.NewRouter()
 	//mux := http.NewServeMux()
 	mux.HandleFunc("/",indexHandler)
-
+	//gorilla mux 에서 지원하는 함수. Method. 같은 이름의 url일지라도 뒤에 
+	//메소드에따라서 구분지어줄 수 있다.
 	mux.HandleFunc("/users",usersHandler).Methods("GET")
 	mux.HandleFunc("/users",createUserHandler).Methods("POST")	
 	mux.HandleFunc("/users/{id:[0-9]+}",getUserInfoHandler)
