@@ -89,6 +89,10 @@ func deleteUserHandler(w http.ResponseWriter, r *http.Request){
 
 }
 
+func updateUserHandler(w http.ResponseWriter, r *http.Request){
+	w.WriteHeader(http.StatusOK)
+}
+
 func NewHandler() http.Handler{
 	userMap = make(map[int]*User)
 	lastID = 0
@@ -99,6 +103,7 @@ func NewHandler() http.Handler{
 	//메소드에따라서 구분지어줄 수 있다.
 	mux.HandleFunc("/users",usersHandler).Methods("GET")
 	mux.HandleFunc("/users",createUserHandler).Methods("POST")	
+	mux.HandleFunc("/users",updateUserHandler).Methods("PUT")
 	mux.HandleFunc("/users/{id:[0-9]+}",getUserInfoHandler).Methods("GET")
 	mux.HandleFunc("/users/{id:[0-9]+}",deleteUserHandler).Methods("DELETE")
 

@@ -114,3 +114,15 @@ func TestDeleteUserInfo(t *testing.T){
 
 }
 
+func TestUpdateUser(t *testing.T){
+	assert := assert.New(t)
+
+	ts := httptest.NewServer(NewHandler())
+	defer ts.Close()
+	req, _ := http.NewRequest("PUT",ts.URL+"/users",strings.NewReader(`{"id" : 1, "first_name":"updated", "last_name":"updated", "email" : "updated@naver.com"}`))
+
+	res, err := http.DefaultClient.Do(req)
+	assert.NoError(err)
+	assert.Equal(http.StatusOK,res.StatusCode)
+
+}
