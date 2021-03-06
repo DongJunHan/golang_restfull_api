@@ -25,7 +25,21 @@ func indexHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func usersHandler(w http.ResponseWriter, r *http.Request){
-	fmt.Fprint(w,"Get UserInfo by /user/{id}")
+	//userMap이 비어있는경우. user정보들이 없는경우.
+	if len(userMap) == 0 {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,"No Users")
+		return
+	}
+	userList := []*User{}
+	for _, u := range userMap{
+		userList = append(userList,u)
+	}
+
+	data, _ := json.Marshal(userList)
+	w.Header().Add("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w,string(data))
 }
 
 func getUserInfoHandler(w http.ResponseWriter, r *http.Request){
@@ -92,6 +106,7 @@ func deleteUserHandler(w http.ResponseWriter, r *http.Request){
 //1. update시도후, 업데이트해야할 정보가 없으면 create함
 //2. update시도후, 업데이트해야할 정보가 없으면 error를 반환
 func updateUserHandler(w http.ResponseWriter, r *http.Request){
+	//해당 예제에서는 1번으로 구현함.
 	updateUser := new(User)
 	err := json.NewDecoder(r.Body).Decode(updateUser)
 	if err != nil {
